@@ -24,34 +24,38 @@ npm run test:watch
 npm run build   # next build
 ```
 
+## Ramas y ambientes
+
+`dev` → `qa` → `main`, mismo esquema que `my-app-workflows`. Se promueve
+siempre por PR y hacia adelante.
+
 ## CI/CD
 
-- `.github/workflows/ci.yml` — lint + test + build en cada push/PR a `main`.
-- `.github/workflows/deploy.yml` — build y deploy a Vercel (produccion) en cada push a `main`.
+- `.github/workflows/ci.yml` — lint + test + build en cada push/PR a `dev`, `qa` o `main`.
+- `.github/workflows/deploy-reusable.yml` — la lógica real de deploy (`vercel pull` → `vercel build` → `vercel deploy --prebuilt`), reusable.
+- `.github/workflows/deploy-dev.yml` y `deploy-qa.yml` — deploy de **preview** en Vercel (sin `--prod`) en cada push a `dev`/`qa`.
+- `.github/workflows/deploy-prod.yml` — deploy de **producción** en Vercel en cada push a `main`.
 
 ## Pasos pendientes (a mano, fuera de este repo)
 
-1. **Crear el repo en GitHub** y pushear esto:
-   ```bash
-   git remote add origin <URL_DEL_REPO>
-   git branch -M main
-   git push -u origin main
-   ```
-
-2. **Crear un proyecto en [vercel.com](https://vercel.com)** conectado a ese repo
+1. **Crear un proyecto en [vercel.com](https://vercel.com)** conectado a este repo
    (opcion mas simple: solo con eso Vercel ya despliega solo por su cuenta en
    cada push/PR, sin tocar ningun workflow — es su integracion nativa de Git).
 
-3. Si ademas queres que sea el workflow de `deploy.yml` el que dispare el
-   deploy (para practicar el mecanismo con GitHub Actions, no solo confiar en
-   la integracion automatica de Vercel), necesitas 3 secrets en
+2. Si ademas queres que sean los workflows de `deploy-dev/qa/prod.yml` los que
+   disparen el deploy (para practicar el mecanismo con GitHub Actions, no solo
+   confiar en la integracion automatica de Vercel), necesitas 3 secrets en
    `Settings -> Secrets and variables -> Actions` del repo de GitHub:
    - `VERCEL_TOKEN` — Vercel -> Account Settings -> Tokens -> Create.
    - `VERCEL_ORG_ID` y `VERCEL_PROJECT_ID` — corriendo `vercel link` en este
      proyecto localmente (con `npx vercel login` primero), quedan en
      `.vercel/project.json` (ese archivo esta gitignoreado, no se commitea).
 
-Si haces los 3 pasos, vas a tener **dos** mecanismos de deploy activos a la vez
-(la integracion nativa de Vercel + el workflow de GitHub Actions) — para este
+Si haces los 2 pasos, vas a tener **dos** mecanismos de deploy activos a la vez
+(la integracion nativa de Vercel + los workflows de GitHub Actions) — para este
 proyecto de práctica no hay drama en que convivan, pero es bueno saber que
 existen los dos y por que.
+
+3. Configurar branch protection (Rulesets) para `dev`/`qa`/`main` — mismo
+   criterio que en `my-app-workflows`: requerir el check de CI, **no** requerir
+   aprobaciones (sos el único colaborador).
