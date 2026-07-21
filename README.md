@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# nextjs-workflows
 
-## Getting Started
+Proyecto chico y deliberadamente simple: **solo frontend** (Next.js + React,
+sin backend ni base de datos — las tareas se guardan en `localStorage`).
+El objetivo no es la app en si, es practicar el pipeline de **CI/CD** con
+GitHub Actions + Vercel sin la friccion de infraestructura propia (Docker,
+VPS, registries) que tuvo el otro proyecto (`my-app-workflows`).
 
-First, run the development server:
+## Correr en local
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abrir [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run lint    # eslint
+npm run test    # vitest (una sola corrida, para CI)
+npm run test:watch
+npm run build   # next build
+```
 
-## Learn More
+## CI/CD
 
-To learn more about Next.js, take a look at the following resources:
+- `.github/workflows/ci.yml` — lint + test + build en cada push/PR a `main`.
+- `.github/workflows/deploy.yml` — build y deploy a Vercel (produccion) en cada push a `main`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Pasos pendientes (a mano, fuera de este repo)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **Crear el repo en GitHub** y pushear esto:
+   ```bash
+   git remote add origin <URL_DEL_REPO>
+   git branch -M main
+   git push -u origin main
+   ```
 
-## Deploy on Vercel
+2. **Crear un proyecto en [vercel.com](https://vercel.com)** conectado a ese repo
+   (opcion mas simple: solo con eso Vercel ya despliega solo por su cuenta en
+   cada push/PR, sin tocar ningun workflow — es su integracion nativa de Git).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. Si ademas queres que sea el workflow de `deploy.yml` el que dispare el
+   deploy (para practicar el mecanismo con GitHub Actions, no solo confiar en
+   la integracion automatica de Vercel), necesitas 3 secrets en
+   `Settings -> Secrets and variables -> Actions` del repo de GitHub:
+   - `VERCEL_TOKEN` — Vercel -> Account Settings -> Tokens -> Create.
+   - `VERCEL_ORG_ID` y `VERCEL_PROJECT_ID` — corriendo `vercel link` en este
+     proyecto localmente (con `npx vercel login` primero), quedan en
+     `.vercel/project.json` (ese archivo esta gitignoreado, no se commitea).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Si haces los 3 pasos, vas a tener **dos** mecanismos de deploy activos a la vez
+(la integracion nativa de Vercel + el workflow de GitHub Actions) — para este
+proyecto de práctica no hay drama en que convivan, pero es bueno saber que
+existen los dos y por que.
