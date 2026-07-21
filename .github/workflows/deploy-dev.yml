@@ -1,0 +1,13 @@
+name: Deploy - Dev (Vercel preview)
+
+on:
+  push:
+    branches: [dev]
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy-reusable.yml
+    with:
+      vercel-environment: preview
+      extra-flag: ''
+    secrets: inherit
