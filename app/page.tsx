@@ -11,6 +11,14 @@ import {
 } from "@/lib/tareas";
 import styles from "./page.module.css";
 
+const APP_ENV = process.env.NEXT_PUBLIC_APP_ENV ?? "local";
+
+const ENV_INFO: Record<string, { label: string; className: string }> = {
+  production: { label: "🟢 Producción", className: "envProduction" },
+  preview: { label: "🟠 Preview", className: "envPreview" },
+  local: { label: "⚪ Local", className: "envLocal" },
+};
+
 export default function Home() {
   const [tareas, setTareas] = useState<Tarea[]>([]);
   const [titulo, setTitulo] = useState("");
@@ -35,13 +43,17 @@ export default function Home() {
     setDescripcion("");
   };
 
+  const envInfo = ENV_INFO[APP_ENV] ?? ENV_INFO.local;
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <h1>Tareas</h1>
-        <p className={styles.subtitulo}>
-          Se guardan en localStorage — sin backend, sin base de datos.
-        </p>
+        <div className={styles.encabezado}>
+          <h1>Tareas</h1>
+          <span className={`${styles.badge} ${styles[envInfo.className]}`}>
+            {envInfo.label}
+          </span>
+        </div>
 
         <form className={styles.form} onSubmit={handleSubmit}>
           <input
