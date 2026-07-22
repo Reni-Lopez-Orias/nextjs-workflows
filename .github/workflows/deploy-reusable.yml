@@ -1,12 +1,19 @@
-name: Deploy - Vercel (prod)
+name: Reusable - Deploy a Vercel
 
-# Corre despues de un push a main, y solo si CI ya paso (needs no aplica entre
-# archivos de workflow distintos en GitHub Actions -- por eso este archivo
-# vuelve a correr build/test el mismo commit por su cuenta, como capa extra
-# antes de gastar un deploy real).
+# workflow_call: este archivo no se dispara solo, lo invocan
+# deploy-dev.yml / deploy-qa.yml / deploy-prod.yml pasandole estos inputs.
 on:
-  push:
-    branches: [main]
+  workflow_call:
+    inputs:
+      vercel-environment:
+        description: 'production o preview (el --environment de "vercel pull")'
+        required: true
+        type: string
+      extra-flag:
+        description: 'poner "--prod" para producción, o vacío para preview'
+        required: false
+        type: string
+        default: ''
 
 jobs:
   deploy:
@@ -29,17 +36,18 @@ jobs:
       # PROJECT_ID/ORG_ID -- son 3 secrets que hay que crear en GitHub
       # despues de conectar este repo a un proyecto de Vercel (ver README).
       - name: Traer config de Vercel
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=${{ inputs.vercel-environment }} --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
       # El build corre ACA (en el runner de GitHub), no del lado de Vercel --
-      # asi el codigo fuente nunca sale de este pipeline.
+      # asi el codigo fuente nunca sale de este pipeline. "extra-flag" viene
+      # vacio para dev/qa (deploy de preview) y "--prod" para main (produccion).
       - name: Build (en GitHub Actions, no en Vercel)
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build ${{ inputs.extra-flag }} --token=${{ secrets.VERCEL_TOKEN }}
 
       # --prebuilt: sube el resultado ya construido en el paso anterior,
       # en vez de pedirle a Vercel que lo vuelva a construir.
-      - name: Deploy a produccion
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy a Vercel
+        run: vercel deploy --prebuilt ${{ inputs.extra-flag }} --token=${{ secrets.VERCEL_TOKEN }}
