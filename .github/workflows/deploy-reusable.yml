@@ -43,9 +43,14 @@ jobs:
 
       # El build corre ACA (en el runner de GitHub), no del lado de Vercel --
       # asi el codigo fuente nunca sale de este pipeline. "extra-flag" viene
-      # vacio para dev/qa (deploy de preview) y "--prod" para main (produccion).
+      # vacio para dev (deploy de preview) y "--prod" para main (produccion).
+      # NEXT_PUBLIC_APP_ENV: por el prefijo NEXT_PUBLIC_, Next.js la mete en
+      # el bundle del navegador -- es lo que la UI usa para mostrar el badge
+      # de que ambiente es cada deploy.
       - name: Build (en GitHub Actions, no en Vercel)
         run: vercel build ${{ inputs.extra-flag }} --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          NEXT_PUBLIC_APP_ENV: ${{ inputs.vercel-environment }}
 
       # --prebuilt: sube el resultado ya construido en el paso anterior,
       # en vez de pedirle a Vercel que lo vuelva a construir.

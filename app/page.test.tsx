@@ -4,6 +4,12 @@ import userEvent from "@testing-library/user-event";
 import Home from "./page";
 
 describe("Home", () => {
+  it("muestra el badge de ambiente local cuando no hay NEXT_PUBLIC_APP_ENV", async () => {
+    render(<Home />);
+
+    expect(await screen.findByText("⚪ Local")).toBeInTheDocument();
+  });
+
   it("muestra el mensaje de vacio cuando no hay tareas", async () => {
     render(<Home />);
 
