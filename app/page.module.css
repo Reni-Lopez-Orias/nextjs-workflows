@@ -13,6 +13,39 @@
   padding: 48px 24px;
 }
 
+.encabezado {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.envProduction {
+  color: #0a6b2d;
+  background: #e6f6ea;
+  border-color: #b7e4c4;
+}
+
+.envPreview {
+  color: #9a5b00;
+  background: #fff3e0;
+  border-color: #ffdca8;
+}
+
+.envLocal {
+  color: #555;
+  background: #f0f0f0;
+  border-color: #ddd;
+}
+
 .subtitulo {
   color: #666;
   margin: 8px 0 24px;
