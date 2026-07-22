@@ -26,14 +26,20 @@ npm run build   # next build
 
 ## Ramas y ambientes
 
-`dev` → `qa` → `main`, mismo esquema que `my-app-workflows`. Se promueve
-siempre por PR y hacia adelante.
+Solo 2 ramas: `dev` → `main`. Se promueve siempre por PR y hacia adelante.
+
+Ni bien 3 (no 2) porque el plan gratis de Vercel solo da 2 ambientes reales
+(Production y un único Preview genérico) — tener una tercera rama `qa` habría
+apuntado al mismo Preview que `dev`, sin ninguna separación real. Esto es
+distinto de `my-app-workflows`, que sí mantiene dev/qa/prod porque ahí cada
+ambiente corre en su propia infraestructura (Docker), no depende de cuántos
+"ambientes" ofrezca una plataforma externa.
 
 ## CI/CD
 
-- `.github/workflows/ci.yml` — lint + test + build en cada push/PR a `dev`, `qa` o `main`.
+- `.github/workflows/ci.yml` — lint + test + build en cada push/PR a `dev` o `main`.
 - `.github/workflows/deploy-reusable.yml` — la lógica real de deploy (`vercel pull` → `vercel build` → `vercel deploy --prebuilt`), reusable.
-- `.github/workflows/deploy-dev.yml` y `deploy-qa.yml` — deploy de **preview** en Vercel (sin `--prod`) en cada push a `dev`/`qa`.
+- `.github/workflows/deploy-dev.yml` — deploy de **preview** en Vercel (sin `--prod`) en cada push a `dev`.
 - `.github/workflows/deploy-prod.yml` — deploy de **producción** en Vercel en cada push a `main`.
 
 ## Pasos pendientes (a mano, fuera de este repo)
@@ -42,7 +48,7 @@ siempre por PR y hacia adelante.
    (opcion mas simple: solo con eso Vercel ya despliega solo por su cuenta en
    cada push/PR, sin tocar ningun workflow — es su integracion nativa de Git).
 
-2. Si ademas queres que sean los workflows de `deploy-dev/qa/prod.yml` los que
+2. Si ademas queres que sean los workflows de `deploy-dev.yml`/`deploy-prod.yml` los que
    disparen el deploy (para practicar el mecanismo con GitHub Actions, no solo
    confiar en la integracion automatica de Vercel), necesitas 3 secrets en
    `Settings -> Secrets and variables -> Actions` del repo de GitHub:
@@ -56,6 +62,6 @@ Si haces los 2 pasos, vas a tener **dos** mecanismos de deploy activos a la vez
 proyecto de práctica no hay drama en que convivan, pero es bueno saber que
 existen los dos y por que.
 
-3. Configurar branch protection (Rulesets) para `dev`/`qa`/`main` — mismo
+3. Configurar branch protection (Rulesets) para `dev`/`main` — mismo
    criterio que en `my-app-workflows`: requerir el check de CI, **no** requerir
    aprobaciones (sos el único colaborador).
